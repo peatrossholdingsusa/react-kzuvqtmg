@@ -1,95 +1,69 @@
-import React, { useState, useEffect } from "react";
-import axios from 'axios';
-import { Container, Grid, Box } from '@mui/material';
+import React, { useEffect, useState } from 'react';
+import { AppBar, Box, Container, Tab, Tabs, Toolbar, Typography } from '@mui/material';
 import "./style.css";
-import USMap from './components/USMap';
-import StatsCard from './components/StatsCard';
-import SubmissionList from './components/SubmissionList';
+import Dashboard from './components/Dashboard';
+import ToolsHub from './components/ToolsHub';
+import VcfGenerator from './components/VcfGenerator';
+import SendContactCardWorkflow from './components/SendContactCardWorkflow';
+
+// Hash routes: #/ (dashboard), #/tools, #/tools/<tool-id>
+const parseHash = () => {
+  const parts = window.location.hash.replace(/^#\/?/, '').split('/').filter(Boolean);
+  return { section: parts[0] === 'tools' ? 'tools' : 'dashboard', toolId: parts[1] || null };
+};
 
 export default function App() {
-  const [stats, setStats] = useState({
-    totalSubmissions: 0,
-    todaySubmissions: 0,
-    newContacts: 0,
-    topState: '',
-  });
-  const [stateData, setStateData] = useState({});
-  const [submissions, setSubmissions] = useState([]);
+  const [route, setRoute] = useState(parseHash);
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        // Replace with your actual API endpoint and authentication
-        const headers = {
-          'Authorization': `Bearer ${process.env.REACT_APP_API_KEY}`,
-          'Content-Type': 'application/json',
-        };
-
-        const response = await axios.get('YOUR_API_ENDPOINT/submissions', { headers });
-        
-        // Process the data
-        const today = new Date().toISOString().split('T')[0];
-        const submissionsData = response.data;
-        
-        // Calculate stats
-        const todaySubmissions = submissionsData.filter(s => 
-          s.createdAt.startsWith(today)
-        ).length;
-
-        const stateCount = submissionsData.reduce((acc, curr) => {
-          acc[curr.state] = (acc[curr.state] || 0) + 1;
-          return acc;
-        }, {});
-
-        const topState = Object.entries(stateCount)
-          .sort(([,a], [,b]) => b - a)[0][0];
-
-        setStats({
-          totalSubmissions: submissionsData.length,
-          todaySubmissions,
-          newContacts: submissionsData.filter(s => s.isNewContact).length,
-          topState,
-        });
-
-        setStateData(stateCount);
-        setSubmissions(submissionsData);
-      } catch (error) {
-        console.error('Error fetching data:', error);
-      }
+    const onHashChange = () => {
+      setRoute(parseHash());
+      window.scrollTo(0, 0);
     };
-
-    fetchData();
-    // Set up polling every 5 minutes
-    const interval = setInterval(fetchData, 300000);
-    return () => clearInterval(interval);
+    window.addEventListener('hashchange', onHashChange);
+    return () => window.removeEventListener('hashchange', onHashChange);
   }, []);
 
+  const navigate = (path) => {
+    window.location.hash = path;
+  };
+  const openTool = (toolId) => navigate(`/tools/${toolId}`);
+  const backToTools = () => navigate('/tools');
+
+  let content;
+  if (route.section === 'dashboard') {
+    content = <Dashboard />;
+  } else if (route.toolId === 'vcf-generator') {
+    content = <VcfGenerator onBack={backToTools} />;
+  } else if (route.toolId === 'send-contact-card') {
+    content = <SendContactCardWorkflow onBack={backToTools} onOpenTool={openTool} />;
+  } else {
+    content = <ToolsHub onOpenTool={openTool} />;
+  }
+
   return (
-    <Container maxWidth="lg">
-      <Box sx={{ my: 4 }}>
-        <Grid container spacing={2}>
-          <Grid item xs={12} md={3}>
-            <StatsCard title="Total Submissions" value={stats.totalSubmissions} />
-          </Grid>
-          <Grid item xs={12} md={3}>
-            <StatsCard title="Today's Submissions" value={stats.todaySubmissions} />
-          </Grid>
-          <Grid item xs={12} md={3}>
-            <StatsCard title="New Contacts" value={stats.newContacts} />
-          </Grid>
-          <Grid item xs={12} md={3}>
-            <StatsCard title="Top State" value={stats.topState} />
-          </Grid>
-        </Grid>
-
-        <Box sx={{ my: 4 }}>
-          <USMap data={stateData} />
-        </Box>
-
-        <Box sx={{ my: 4 }}>
-          <SubmissionList submissions={submissions} />
-        </Box>
-      </Box>
-    </Container>
+    <>
+      <AppBar position="static" color="default" elevation={1}>
+        <Toolbar sx={{ gap: 2, flexWrap: 'wrap' }}>
+          <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
+            Agent Hub
+          </Typography>
+          <Tabs
+            value={route.section}
+            onChange={(event, value) => navigate(value === 'tools' ? '/tools' : '/')}
+          >
+            <Tab label="Dashboard" value="dashboard" />
+            <Tab label="Free Agent Tools" value="tools" />
+          </Tabs>
+        </Toolbar>
+      </AppBar>
+      {route.section === 'dashboard' ? (
+        content
+      ) : (
+        <Container maxWidth="lg">
+          <Box sx={{ my: 4 }}>{content}</Box>
+        </Container>
+      )}
+    </>
   );
 }
