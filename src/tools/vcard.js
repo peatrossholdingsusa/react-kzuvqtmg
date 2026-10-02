@@ -16,6 +16,8 @@ export const EMPTY_CARD = {
   phone2: '',
   birthday: '',
   anniversary: '',
+  // Data URL (data:image/jpeg;base64,...) shown on the recipient's phone when you call.
+  photo: '',
 };
 
 // Escape characters that have special meaning in vCard text values.
@@ -65,7 +67,21 @@ export const validateCard = (card) => {
   return errors;
 };
 
-export const buildVCard = (card) => {
+const PHOTO_DATA_URL = /^data:image\/(jpeg|jpg|png|gif);base64,([A-Za-z0-9+/=]+)$/i;
+
+// Returns the vCard PHOTO line for a data URL, or null if there is no usable photo.
+export const photoLine = (photo, { truncate = false } = {}) => {
+  const match = PHOTO_DATA_URL.exec(photo || '');
+  if (!match) return null;
+  const type = match[1].toUpperCase() === 'JPG' ? 'JPEG' : match[1].toUpperCase();
+  const data = truncate
+    ? `${match[2].slice(0, 24)}… (${Math.round((match[2].length * 3) / 4 / 1024)} KB photo)`
+    : match[2];
+  return `PHOTO;ENCODING=b;TYPE=${type}:${data}`;
+};
+
+// Pass { truncatePhoto: true } for an on-screen preview that doesn't print the whole image.
+export const buildVCard = (card, { truncatePhoto = false } = {}) => {
   const c = { ...EMPTY_CARD, ...card };
   const lines = [
     'BEGIN:VCARD',
@@ -89,6 +105,8 @@ export const buildVCard = (card) => {
     lines.push(`item1.X-ABDATE:${c.anniversary}`);
     lines.push('item1.X-ABLabel:_$!<Anniversary>!$_');
   }
+  const photo = photoLine(c.photo, { truncate: truncatePhoto });
+  if (photo) lines.push(photo);
   lines.push(`REV:${new Date().toISOString().replace(/\.\d{3}/, '')}`);
   lines.push('END:VCARD');
 

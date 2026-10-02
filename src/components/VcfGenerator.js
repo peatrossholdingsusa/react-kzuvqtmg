@@ -1,6 +1,7 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 import {
   Alert,
+  Avatar,
   Box,
   Button,
   Grid,
@@ -15,6 +16,7 @@ import {
   fullName,
   validateCard,
 } from '../tools/vcard';
+import { preparePhoto } from '../tools/photo';
 
 const SECTIONS = [
   {
@@ -58,7 +60,28 @@ const VcfGenerator = ({ onBack }) => {
   const [errors, setErrors] = useState({});
   const [message, setMessage] = useState(null);
 
-  const preview = useMemo(() => buildVCard(card), [card]);
+  const [photoBusy, setPhotoBusy] = useState(false);
+  const photoInput = useRef(null);
+
+  const preview = useMemo(() => buildVCard(card, { truncatePhoto: true }), [card]);
+
+  const handlePhoto = async (event) => {
+    const file = event.target.files && event.target.files[0];
+    event.target.value = '';
+    if (!file) return;
+    setPhotoBusy(true);
+    try {
+      const photo = await preparePhoto(file);
+      setCard((prev) => ({ ...prev, photo }));
+      setMessage(null);
+    } catch (error) {
+      setMessage({ severity: 'error', text: error.message });
+    } finally {
+      setPhotoBusy(false);
+    }
+  };
+
+  const initials = `${card.firstName.trim().charAt(0)}${card.lastName.trim().charAt(0)}`.toUpperCase();
 
   const handleChange = (event) => {
     const { name, value } = event.target;
@@ -80,7 +103,7 @@ const VcfGenerator = ({ onBack }) => {
 
   const handleCopy = async () => {
     try {
-      await navigator.clipboard.writeText(preview);
+      await navigator.clipboard.writeText(buildVCard(card));
       setMessage({ severity: 'success', text: 'vCard text copied to clipboard.' });
     } catch (error) {
       setMessage({ severity: 'error', text: 'Could not copy — select the preview text instead.' });
@@ -103,6 +126,48 @@ const VcfGenerator = ({ onBack }) => {
       <Grid container spacing={3}>
         <Grid size={{ xs: 12, md: 7 }}>
           <Paper component="form" noValidate onSubmit={handleSubmit} sx={{ p: 3 }}>
+            <Box sx={{ mb: 3 }}>
+              <Typography variant="h6" component="h2" gutterBottom>
+                Contact Photo
+              </Typography>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, flexWrap: 'wrap' }}>
+                <Avatar
+                  src={card.photo || undefined}
+                  alt="Contact photo preview"
+                  sx={{ width: 96, height: 96, fontSize: 32 }}
+                >
+                  {initials || '?'}
+                </Avatar>
+                <Box>
+                  <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mb: 1 }}>
+                    <Button
+                      variant="outlined"
+                      onClick={() => photoInput.current && photoInput.current.click()}
+                      disabled={photoBusy}
+                    >
+                      {photoBusy ? 'Processing…' : card.photo ? 'Change photo' : 'Upload photo'}
+                    </Button>
+                    {card.photo && (
+                      <Button color="error" onClick={() => setCard((prev) => ({ ...prev, photo: '' }))}>
+                        Remove
+                      </Button>
+                    )}
+                  </Box>
+                  <Typography variant="body2" color="text.secondary">
+                    Your headshot pops up on your client's screen when you call or text, once they
+                    save your card. It's cropped to a square and resized automatically.
+                  </Typography>
+                </Box>
+                <input
+                  ref={photoInput}
+                  id="photo"
+                  type="file"
+                  accept="image/*"
+                  hidden
+                  onChange={handlePhoto}
+                />
+              </Box>
+            </Box>
             {SECTIONS.map((section) => (
               <Box key={section.title} sx={{ mb: 3 }}>
                 <Typography variant="h6" component="h2" gutterBottom>

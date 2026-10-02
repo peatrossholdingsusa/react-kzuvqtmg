@@ -6,7 +6,7 @@ export const TOOLS = [
     title: 'Contact Card (VCF) Generator',
     category: 'Generator',
     description:
-      'Create a .vcf contact card your clients can save to their phone in one tap. ' +
+      'Create a .vcf contact card with your photo, so your face pops up when you call. ' +
       'Built in your browser — nothing is uploaded.',
     cta: 'Open generator',
   },

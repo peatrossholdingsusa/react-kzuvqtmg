@@ -53,3 +53,17 @@ test('creates a safe file name', () => {
   expect(vcardFileName(card)).toBe('Jane-Agent.vcf');
   expect(vcardFileName(EMPTY_CARD)).toBe('contact.vcf');
 });
+
+test('embeds a contact photo as base64 and folds it', () => {
+  const data = 'A'.repeat(300);
+  const vcf = buildVCard({ ...card, photo: `data:image/jpeg;base64,${data}` });
+  const unfolded = vcf.replace(/\r\n /g, '');
+  expect(unfolded).toContain(`PHOTO;ENCODING=b;TYPE=JPEG:${data}\r\n`);
+  expect(vcf.split('\r\n').every((line) => line.length <= 75)).toBe(true);
+});
+
+test('truncates the photo in previews and ignores invalid photos', () => {
+  const photo = `data:image/png;base64,${'B'.repeat(4000)}`;
+  expect(buildVCard({ ...card, photo }, { truncatePhoto: true })).toMatch(/PHOTO;ENCODING=b;TYPE=PNG:B{24}… \(3 KB photo\)/);
+  expect(buildVCard({ ...card, photo: 'not-a-data-url' })).not.toContain('PHOTO');
+});

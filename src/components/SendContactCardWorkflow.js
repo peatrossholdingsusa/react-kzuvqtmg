@@ -14,7 +14,7 @@ import {
 const STEPS = [
   {
     label: 'Create your contact card',
-    body: 'Use the free Contact Card (VCF) Generator to download a .vcf file with your name, agency, phone, email and website.',
+    body: 'Use the free Contact Card (VCF) Generator to download a .vcf file with your photo, name, agency, phone, email and website — your photo then shows up on their screen when you call.',
     action: 'vcf-generator',
   },
   {
