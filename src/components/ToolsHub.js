@@ -15,7 +15,7 @@ const ToolsHub = ({ onOpenTool }) => {
   return (
     <Box>
       <Typography variant="h4" component="h1" gutterBottom>
-        Free Agent Tools
+        AgencyView Free Agent Tools
       </Typography>
       <Typography color="text.secondary" sx={{ mb: 3 }}>
         Free tools to help insurance agents stay in their clients' phones and inboxes.

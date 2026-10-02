@@ -4,7 +4,6 @@ import {
   Box,
   Button,
   Grid,
-  Link,
   Paper,
   TextField,
   Typography,
@@ -16,7 +15,6 @@ import {
   fullName,
   validateCard,
 } from '../tools/vcard';
-import { OFFICIAL_VCF_GENERATOR_URL } from '../tools/registry';
 
 const SECTIONS = [
   {
@@ -99,11 +97,7 @@ const VcfGenerator = ({ onBack }) => {
       </Typography>
       <Typography color="text.secondary" sx={{ mb: 3 }}>
         Fill out the form and your VCF card downloads to your device immediately. Your card is
-        built in your browser and is not sent anywhere. Prefer the hosted version? Use the{' '}
-        <Link href={OFFICIAL_VCF_GENERATOR_URL} target="_blank" rel="noopener noreferrer">
-          Agent CRM generator
-        </Link>
-        .
+        built in your browser and is not sent anywhere.
       </Typography>
 
       <Grid container spacing={3}>
@@ -177,7 +171,7 @@ const VcfGenerator = ({ onBack }) => {
               {preview}
             </Box>
             <Typography variant="body2" color="text.secondary">
-              Tip: upload the downloaded .vcf to your CRM's media library and use the Send Contact
+              Tip: upload the downloaded .vcf to your AgencyView media library and use the Send Contact
               Card workflow to share it with every new lead.
             </Typography>
           </Paper>

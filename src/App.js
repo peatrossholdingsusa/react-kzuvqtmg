@@ -46,7 +46,7 @@ export default function App() {
       <AppBar position="static" color="default" elevation={1}>
         <Toolbar sx={{ gap: 2, flexWrap: 'wrap' }}>
           <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-            Agent Hub
+            AgencyView
           </Typography>
           <Tabs
             value={route.section}

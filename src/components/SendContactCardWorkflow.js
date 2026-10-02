@@ -19,7 +19,7 @@ const STEPS = [
   },
   {
     label: 'Open the Click and Play library',
-    body: 'In Agent CRM, go to Add-ons → Click and Play library.',
+    body: 'In AgencyView, go to Add-ons → Click and Play library.',
   },
   {
     label: 'Install "Send Contact Card"',
@@ -73,8 +73,7 @@ const SendContactCardWorkflow = ({ onBack, onOpenTool }) => {
       </Paper>
 
       <Alert severity="info" sx={{ mt: 3 }}>
-        The Send Contact Card workflow lives in the Click and Play library under Add-ons. Need help?
-        Email support@agent-crm.com.
+        The Send Contact Card workflow lives in the AgencyView Click and Play library under Add-ons.
       </Alert>
     </Box>
   );

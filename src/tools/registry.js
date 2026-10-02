@@ -1,5 +1,4 @@
-// Free agent tools listed in the hub. Add new tools here.
-export const OFFICIAL_VCF_GENERATOR_URL = 'http://vcf.agent-crm.com';
+// Free agent tools listed in the AgencyView hub. Add new tools here.
 
 export const TOOLS = [
   {
@@ -17,7 +16,7 @@ export const TOOLS = [
     category: 'Workflow',
     description:
       'Automatically text or email your contact card to every new lead. Install it from the ' +
-      'Click and Play library under Add-ons in Agent CRM.',
+      'Click and Play library under Add-ons in AgencyView.',
     cta: 'View setup guide',
   },
 ];
