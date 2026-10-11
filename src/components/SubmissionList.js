@@ -8,6 +8,7 @@ import {
   TableRow, 
   Paper 
 } from '@mui/material';
+import BenefitsDocumentLink from './BenefitsDocumentLink';
 
 const SubmissionList = ({ submissions }) => {
   // HIPAA compliant display - only showing non-sensitive information
@@ -20,6 +21,8 @@ const SubmissionList = ({ submissions }) => {
             <TableCell>Date</TableCell>
             <TableCell>State</TableCell>
             <TableCell>Status</TableCell>
+            <TableCell>Carrier</TableCell>
+            <TableCell>Benefits</TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
@@ -29,6 +32,12 @@ const SubmissionList = ({ submissions }) => {
               <TableCell>{new Date(submission.createdAt).toLocaleDateString()}</TableCell>
               <TableCell>{submission.state}</TableCell>
               <TableCell>{submission.status}</TableCell>
+              <TableCell>{submission.carrierName || submission.carrier_name}</TableCell>
+              <TableCell>
+                <BenefitsDocumentLink
+                  document={submission.benefitsDocument || submission.benefits_document_url}
+                />
+              </TableCell>
             </TableRow>
           ))}
         </TableBody>
