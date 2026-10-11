@@ -9,6 +9,7 @@ import {
 } from './submissionWebhook';
 import { createEnrollmentStore } from './enrollmentStore';
 import BenefitsDocumentLink from '../components/BenefitsDocumentLink';
+import BenefitsDocumentViewer, { safeViewUrl } from '../components/BenefitsDocumentViewer';
 
 const SOB_URL = 'https://medicare.healthsherpa.com/documents/sob/abc123.pdf';
 const RECEIVED_AT = new Date('2026-10-10T12:00:00Z');
@@ -247,4 +248,61 @@ describe('BenefitsDocumentLink', () => {
       expect(html).toContain('Not available');
     }
   );
+});
+
+describe('BenefitsDocumentViewer', () => {
+  beforeAll(() => {
+    global.IS_REACT_ACT_ENVIRONMENT = true;
+  });
+
+  const stored = {
+    url: SOB_URL,
+    label: 'Summary of Benefits',
+    status: 'stored',
+    viewUrl: '/api/enrollments/enr_1/benefits-document',
+  };
+
+  it('embeds the stored PDF in a dialog', () => {
+    const container = document.createElement('div');
+    document.body.appendChild(container);
+    const root = createRoot(container);
+    act(() => root.render(<BenefitsDocumentViewer document={stored} />));
+
+    const button = container.querySelector('button');
+    expect(button.textContent).toBe('Summary of Benefits');
+    act(() => button.click());
+
+    const embed = document.querySelector('object[type="application/pdf"]');
+    expect(embed.getAttribute('data')).toBe(stored.viewUrl);
+    act(() => root.unmount());
+    container.remove();
+  });
+
+  it('falls back to the HealthSherpa link before the copy is stored', () => {
+    const html = renderToHtml(<BenefitsDocumentViewer document={{ ...stored, status: undefined }} />);
+    expect(html).toContain(`href="${SOB_URL}"`);
+    expect(html).not.toContain('<object');
+  });
+
+  it('explains why the copy is missing after a failed download', () => {
+    const html = renderToHtml(
+      <BenefitsDocumentViewer
+        document={{ url: SOB_URL, status: 'download_failed', failureReason: 'expired_or_missing' }}
+      />
+    );
+    expect(html).toContain(`href="${SOB_URL}"`);
+    expect(html).toContain('Copy not saved: link expired or not found');
+  });
+
+  it.each([
+    ['/api/x.pdf', '/api/x.pdf'],
+    ['https://agencyview.example.com/x.pdf', 'https://agencyview.example.com/x.pdf'],
+    ['//evil.example.com/x.pdf', null],
+    ['http://agencyview.example.com/x.pdf', null],
+    ['javascript:alert(1)', null], // eslint-disable-line no-script-url
+    ['', null],
+    [undefined, null],
+  ])('only embeds safe view URLs (%p)', (value, expected) => {
+    expect(safeViewUrl(value)).toBe(expected);
+  });
 });

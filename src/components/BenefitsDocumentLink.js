@@ -2,8 +2,9 @@ import React from 'react';
 import { Link, Tooltip, Typography } from '@mui/material';
 import { parseBenefitsDocumentUrl } from '../healthsherpa/submissionWebhook';
 
-// Opens the HealthSherpa-hosted benefits PDF in a new tab. AgencyView does not
-// download or keep a copy. The URL is checked again at render, so a bad value
+// Opens the HealthSherpa-hosted benefits PDF in a new tab. This is the fallback
+// for when AgencyView has not stored its own copy yet (see
+// BenefitsDocumentViewer). The URL is checked again at render, so a bad value
 // already in storage is never shown as a link.
 const BenefitsDocumentLink = ({ document }) => {
   const rawUrl = document && typeof document === 'object' ? document.url : document;

@@ -78,8 +78,18 @@ export function createEnrollmentStore() {
     return { action: 'updated', record: merged };
   }
 
+  // Records the outcome of downloading and storing the benefits PDF.
+  function setBenefitsDocument(id, benefitsDocument) {
+    const existing = records.get(id);
+    if (!existing) return null;
+    const updated = { ...existing, benefitsDocument };
+    records.set(id, updated);
+    return updated;
+  }
+
   return {
     upsert,
+    setBenefitsDocument,
     get: (id) => records.get(id) || null,
     all: () => Array.from(records.values()),
   };

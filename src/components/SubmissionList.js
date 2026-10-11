@@ -8,7 +8,7 @@ import {
   TableRow, 
   Paper 
 } from '@mui/material';
-import BenefitsDocumentLink from './BenefitsDocumentLink';
+import BenefitsDocumentViewer from './BenefitsDocumentViewer';
 
 const SubmissionList = ({ submissions }) => {
   // HIPAA compliant display - only showing non-sensitive information
@@ -34,7 +34,7 @@ const SubmissionList = ({ submissions }) => {
               <TableCell>{submission.status}</TableCell>
               <TableCell>{submission.carrierName || submission.carrier_name}</TableCell>
               <TableCell>
-                <BenefitsDocumentLink
+                <BenefitsDocumentViewer
                   document={submission.benefitsDocument || submission.benefits_document_url}
                 />
               </TableCell>

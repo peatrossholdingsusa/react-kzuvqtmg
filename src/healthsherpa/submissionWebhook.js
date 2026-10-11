@@ -78,8 +78,9 @@ export function parseSubmissionWebhook(payload, { receivedAt = new Date() } = {}
     warnings.push(`Unrecognized carrier: ${carrier.raw || '(blank)'}`);
   }
 
-  // HealthSherpa-hosted link. Store the reference only; never download it here.
-  // Expiration and auth behavior are unconfirmed, so it is not treated as permanent.
+  // HealthSherpa-hosted link. The parser does no network I/O; the PDF is
+  // downloaded afterwards by attachBenefitsDocument (benefitsDocumentFetcher.js).
+  // Expiration and auth behavior are unconfirmed, so the link is not treated as permanent.
   const benefits = parseBenefitsDocumentUrl(app.benefits_document_url);
   if (benefits.warning) warnings.push(benefits.warning);
 
